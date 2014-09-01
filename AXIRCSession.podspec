@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
   s.name             = "AXIRCSession"
   s.version          = "0.1.0"
-  s.summary          = "Internet Relay Chat Protocol"
+  s.summary          = "Internet Relay Chat Protocol (IRC) library for iOS"
   s.homepage         = "https://github.com/axidms/AXIRCSession"
   s.license          = 'MIT'
   s.author           = { "Alexander Mertvetsov" => "amertvetsov@yandex.ru" }
