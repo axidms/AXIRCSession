@@ -185,7 +185,7 @@ extern NSInteger const AXIRC_ERR_USERSDONTMATCH;
 
 extern NSString *const AXIRCCommandArray[];
 
-extern NSInteger const AXIRCMaxMessageLength;
+extern int const AXIRCMaxMessageLength;
 
 /*
  * From RFC 1459:
