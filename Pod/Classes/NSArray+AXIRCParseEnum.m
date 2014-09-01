@@ -10,17 +10,20 @@
 
 @implementation NSArray (AXIRCParseEnum)
 
-- (NSString *)axirc_stringWithEnum:(NSUInteger)enumValue {
-    return [self objectAtIndex:enumValue];
+- (NSString *)axirc_stringWithEnum:(NSInteger)enumValue
+{
+    return [self objectAtIndex:(NSUInteger)enumValue];
 }
 
-- (NSUInteger)axirc_enumFromString:(NSString *)strValue andDefault:(NSUInteger)def {
-    NSUInteger n = [self indexOfObject:strValue];
+- (NSInteger)axirc_enumFromString:(NSString *)strValue andDefault:(NSInteger)def
+{
+    NSInteger n = [self indexOfObject:strValue];
     if (n == NSNotFound) n = def;
     return n;
 }
 
-- (NSUInteger)axirc_enumFromString:(NSString *)strValue {
+- (NSInteger)axirc_enumFromString:(NSString *)strValue
+{
     return [self axirc_enumFromString:strValue andDefault:0];
 }
 

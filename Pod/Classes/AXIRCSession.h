@@ -11,7 +11,7 @@
 
 @class AXIRCSession;
 
-@protocol AXIRCSessionDelegate <NSObject>
+@protocol AXIRCSessionDelegate<NSObject>
 
 @optional
 
@@ -26,7 +26,9 @@
 @interface AXIRCSession : NSObject
 
 - (void)connectToServer:(NSString *)server withPort:(NSInteger)port;
+
 - (void)sendMessage:(AXIRCMessage *)message;
+
 - (void)disconnect;
 
 @property (nonatomic, assign) id<AXIRCSessionDelegate> delegate;

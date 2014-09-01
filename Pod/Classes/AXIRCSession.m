@@ -8,18 +8,16 @@
 
 #import "AXIRCSession.h"
 
-static int AXIRCFindMessageSeparator(const uint8_t * buf, int length)
-{
-	for (int offset = 0; offset < length; offset++)
-	{
-		if (buf[offset] == 0x0D && offset < length - 1 && buf[offset+1] == 0x0A)
-			return offset + 2;
-	}
-    
-	return length;
+static int AXIRCFindMessageSeparator(const uint8_t *buf, int length) {
+    for (int offset = 0; offset < length; offset++) {
+        if (buf[offset] == 0x0D && offset < length - 1 && buf[offset + 1] == 0x0A)
+            return offset + 2;
+    }
+
+    return length;
 }
 
-@interface AXIRCSession () <NSStreamDelegate> {
+@interface AXIRCSession ()<NSStreamDelegate> {
     NSInputStream *_inputStream;
     NSOutputStream *_outputStream;
     NSRecursiveLock *_lock;
@@ -35,12 +33,12 @@ static int AXIRCFindMessageSeparator(const uint8_t * buf, int length)
 - (id)init
 {
     self = [super init];
-    
+
     if (self) {
         _lock = [[NSRecursiveLock alloc] init];
         _encoding = NSASCIIStringEncoding;
     }
-    
+
     return self;
 }
 
@@ -64,7 +62,7 @@ static int AXIRCFindMessageSeparator(const uint8_t * buf, int length)
 - (void)sendMessage:(AXIRCMessage *)message
 {
     [_lock lock];
-    const uint8_t *messageStr = [message bytesUsingEncoding:self.encoding];    
+    const uint8_t *messageStr = [message bytesUsingEncoding:self.encoding];
     [_outputStream write:messageStr maxLength:strlen((const char *)messageStr)];
     [_lock unlock];
 }
@@ -75,12 +73,12 @@ static int AXIRCFindMessageSeparator(const uint8_t * buf, int length)
     _inputStream.delegate = nil;
     [_inputStream close];
     _inputStream = nil;
-    
+
     [_outputStream removeFromRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
     _outputStream.delegate = nil;
     [_outputStream close];
     _outputStream = nil;
-    
+
     if (self.delegate && [self.delegate respondsToSelector:@selector(session:wasDisconnectedFromServer:withPort:)]) {
         [self.delegate session:self wasDisconnectedFromServer:self.server withPort:self.port];
     }
@@ -88,63 +86,14 @@ static int AXIRCFindMessageSeparator(const uint8_t * buf, int length)
 
 - (void)stream:(NSStream *)theStream handleEvent:(NSStreamEvent)streamEvent
 {
-//    switch (streamEvent) {
-//		case NSStreamEventOpenCompleted:
-//			NSLog(@"Stream opened");
-//			break;
-//            
-//		case NSStreamEventHasBytesAvailable: {
-//            if (theStream != _inputStream)
-//                return;
-//            
-//            uint8_t buffer[AXIRCMaxMessageLength * 2];
-//            NSMutableArray *messages = [NSMutableArray array];
-//            
-//            while ([_inputStream hasBytesAvailable]) {
-//                int length = (int)[_inputStream read:buffer maxLength:sizeof(buffer)];
-//                int offset = 0;
-//                
-//                do {
-//                    memmove (buffer, buffer + offset, length - offset);
-//                    length -= offset;
-//                    offset = AXIRCFindMessageSeparator(buffer, length);
-//                    AXIRCMessage *message = [AXIRCMessage messageFromBytes:buffer length:offset - 2 usingEncoding:self.encoding];
-//                    [messages addObject:message];
-//                    
-//                    if (message.command == 1 || message.command == AXIRC_RPL_ENDOFMOTD || message.command == AXIRC_ERR_NOMOTD) {
-//                        if (self.delegate && [self.delegate respondsToSelector:@selector(session:didConnectToServer:withPort:)]) {
-//                            [self.delegate session:self didConnectToServer:self.server withPort:self.port];
-//                        }
-//                    }
-//                    
-//                } while (length != offset);
-//            }
-//            
-//            if (self.delegate && [self.delegate respondsToSelector:@selector(session:didReceiveMessages:)]) {
-//                [self.delegate session:self didReceiveMessages:messages];
-//            }
-//            
-//            break;
-//        }
-//        
-//        case NSStreamEventEndEncountered:
-//            [self disconnect];
-//			break;
-//            
-//		default:
-//			break;
-//	}
-//    
-//
-    
     if (streamEvent & NSStreamEventHasBytesAvailable) {
-        
+
         if (theStream != _inputStream)
             return;
-        
+
         uint8_t buffer[AXIRCMaxMessageLength * 2];
         NSMutableArray *messages = [NSMutableArray array];
-        
+
         while ([_inputStream hasBytesAvailable]) {
             int length = (int)[_inputStream read:buffer maxLength:sizeof(buffer)];
             int offset = 0;
@@ -153,22 +102,25 @@ static int AXIRCFindMessageSeparator(const uint8_t * buf, int length)
                 memmove (buffer, buffer + offset, length - offset);
                 length -= offset;
                 offset = AXIRCFindMessageSeparator(buffer, length);
-                AXIRCMessage *message = [AXIRCMessage messageFromBytes:buffer length:offset usingEncoding:self.encoding];
+                AXIRCMessage
+                    *message =
+                    [AXIRCMessage messageFromBytes:buffer length:(NSUInteger)offset usingEncoding:self.encoding];
                 [messages addObject:message];
-                
+
                 if (message.command == 1 || message.command == AXIRC_RPL_ENDOFMOTD || message.command == AXIRC_ERR_NOMOTD) {
                     if (self.delegate && [self.delegate respondsToSelector:@selector(session:didConnectToServer:withPort:)]) {
                         [self.delegate session:self didConnectToServer:self.server withPort:self.port];
                     }
                 }
-                
+
             } while (length != offset);
         }
-       
+
         if (self.delegate && [self.delegate respondsToSelector:@selector(session:didReceiveMessages:)]) {
             [self.delegate session:self didReceiveMessages:messages];
         }
-    } else if (streamEvent & NSStreamEventEndEncountered) {
+    }
+    else if (streamEvent & NSStreamEventEndEncountered) {
         [self disconnect];
     }
 }

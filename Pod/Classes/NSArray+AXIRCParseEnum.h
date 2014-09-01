@@ -10,10 +10,10 @@
 
 @interface NSArray (AXIRCParseEnum)
 
-- (NSString *)axirc_stringWithEnum:(NSUInteger)enumValue;
+- (NSString *)axirc_stringWithEnum:(NSInteger)enumValue;
 
-- (NSUInteger)axirc_enumFromString:(NSString *)strValue andDefault:(NSUInteger)def;
+- (NSInteger)axirc_enumFromString:(NSString *)strValue andDefault:(NSInteger)def;
 
-- (NSUInteger)axirc_enumFromString:(NSString *)strValue;
+- (NSInteger)axirc_enumFromString:(NSString *)strValue;
 
 @end

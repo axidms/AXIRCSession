@@ -12,53 +12,53 @@
 /// Values for AXIRCCommand
 typedef NS_ENUM(NSInteger, AXIRCCommand) {
 // Connection Registration
-    AXIRCCommandPASS = 0,
-    AXIRCCommandNICK,
-    AXIRCCommandUSER,
-    AXIRCCommandSERVER,
-    AXIRCCommandOPER,
-    AXIRCCommandQUIT,
-    AXIRCCommandSQUIT,
+        AXIRCCommandPASS = 0,
+        AXIRCCommandNICK,
+        AXIRCCommandUSER,
+        AXIRCCommandSERVER,
+        AXIRCCommandOPER,
+        AXIRCCommandQUIT,
+        AXIRCCommandSQUIT,
 // Channel operations
-    AXIRCCommandJOIN,
-    AXIRCCommandPART,
-    AXIRCCommandMODE,
-    AXIRCCommandTOPIC,
-    AXIRCCommandNAMES,
-    AXIRCCommandLIST,
-    AXIRCCommandINVITE,
-    AXIRCCommandKICK,
+        AXIRCCommandJOIN,
+        AXIRCCommandPART,
+        AXIRCCommandMODE,
+        AXIRCCommandTOPIC,
+        AXIRCCommandNAMES,
+        AXIRCCommandLIST,
+        AXIRCCommandINVITE,
+        AXIRCCommandKICK,
 // Server queries and commands
-    AXIRCCommandVERSION,
-    AXIRCCommandSTATS,
-    AXIRCCommandLINKS,
-    AXIRCCommandTIME,
-    AXIRCCommandCONNECT,
-    AXIRCCommandTRACE,
-    AXIRCCommandADMIN,
-    AXIRCCommandINFO,
+        AXIRCCommandVERSION,
+        AXIRCCommandSTATS,
+        AXIRCCommandLINKS,
+        AXIRCCommandTIME,
+        AXIRCCommandCONNECT,
+        AXIRCCommandTRACE,
+        AXIRCCommandADMIN,
+        AXIRCCommandINFO,
 // Sending messages
-    AXIRCCommandPRIVMSG,
-    AXIRCCommandNOTICE,
+        AXIRCCommandPRIVMSG,
+        AXIRCCommandNOTICE,
 // User-based queries
-    AXIRCCommandWHO,
-    AXIRCCommandWHOIS,
-    AXIRCCommandWHOWAS,
+        AXIRCCommandWHO,
+        AXIRCCommandWHOIS,
+        AXIRCCommandWHOWAS,
 // Miscellaneous messages
-    AXIRCCommandKILL,
-    AXIRCCommandPING,
-    AXIRCCommandPONG,
-    AXIRCCommandERROR,
+        AXIRCCommandKILL,
+        AXIRCCommandPING,
+        AXIRCCommandPONG,
+        AXIRCCommandERROR,
 /// OPTIONAL MESSAGES
-    AXIRCCommandAWAY,
-    AXIRCCommandREHASH,
-    AXIRCCommandRESTART,
-    AXIRCCommandSUMMON,
-    AXIRCCommandUSERS,
-    AXIRCCommandWALLOPS,
-    AXIRCCommandUSERHOST,
-    AXIRCCommandISON,
-    AXIRCCommandCount
+        AXIRCCommandAWAY,
+        AXIRCCommandREHASH,
+        AXIRCCommandRESTART,
+        AXIRCCommandSUMMON,
+        AXIRCCommandUSERS,
+        AXIRCCommandWALLOPS,
+        AXIRCCommandUSERHOST,
+        AXIRCCommandISON,
+        AXIRCCommandCount
 };
 
 /// COMMAND RESPONSES
@@ -205,6 +205,7 @@ extern NSInteger const AXIRCMaxMessageLength;
 + (instancetype)messageFromBytes:(const uint8_t *)messagesBuffer
                           length:(NSUInteger)len
                    usingEncoding:(NSStringEncoding)encoding;
+
 // prefix - for client always nil;
 + (instancetype)messageWithPrefix:(AXIRCPrefix *)prefix
                           command:(NSInteger)command

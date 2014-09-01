@@ -15,13 +15,13 @@
                       host:(NSString *)host
 {
     self = [super init];
-    
+
     if (self) {
         _nickOrServer = [nickOrServer copy];
         _user = [user copy];
         _host = [host copy];
     }
-    
+
     return self;
 }
 

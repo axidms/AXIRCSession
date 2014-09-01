@@ -187,13 +187,13 @@ static NSInteger const kMaxParamsAllowed = 10;
               params:(NSArray *)params
 {
     self = [super init];
-    
+
     if (self) {
         _prefix = prefix;
         _command = command;
         _params = params;
     }
-    
+
     return self;
 }
 
@@ -209,138 +209,144 @@ static NSInteger const kMaxParamsAllowed = 10;
                    usingEncoding:(NSStringEncoding)encoding
 {
     uint8_t buffer[AXIRCMaxMessageLength * 2];
-    
-	memcpy (buffer, messagesBuffer, len);
-	buffer[len] = '\0';
-    
+
+    memcpy (buffer, messagesBuffer, len);
+    buffer[len] = '\0';
+
     uint8_t *p = (uint8_t *)buffer;
     const char *nickOrServer = 0, *user = 0, *host = 0;
     const char *command = 0, *trailingParam = 0, *middleParam = 0;
     AXIRCPrefix *prefix;
     NSInteger commandKey = -1, paramNumber = 0;
     NSMutableArray *params = [NSMutableArray array];
-    
+
     // <prefix>   ::= <servername> | <nick> [ '!' <user> ] [ '@' <host> ]
-    
-    if (buffer[0] == ':')
-	{
-		while (*p && *p != ' ') {
+
+    if (buffer[0] == ':') {
+        while (*p && *p != ' ') {
             if (*p == '@') {
                 *p++ = '\0';
                 host = (const char *)p;
-            } else if (*p == '!') {
+            }
+            else if (*p == '!') {
                 *p++ = '\0';
                 user = (const char *)p;
-            } else
+            }
+            else
                 p++;
         }
-        
-		*p++ = '\0';
-		nickOrServer = (const char *)buffer + 1;
-        NSString *nickOrServerString = nickOrServer != NULL ? [[NSString alloc] initWithCString:nickOrServer encoding:encoding] : nil;
+
+        *p++ = '\0';
+        nickOrServer = (const char *)buffer + 1;
+        NSString *nickOrServerString =
+            nickOrServer != NULL ? [[NSString alloc] initWithCString:nickOrServer encoding:encoding] : nil;
         NSString *userString = user != NULL ? [[NSString alloc] initWithCString:user encoding:encoding] : nil;
         NSString *hostString = host != NULL ? [[NSString alloc] initWithCString:host encoding:encoding] : nil;
-        
+
         prefix = [AXIRCPrefix prefixWithNickOrServer:nickOrServerString user:userString host:hostString];
-	}
-    
+    }
+
     // <command>  ::= <letter> { <letter> } | <number> <number> <number>
-    
+
     command = (const char *)p;
-    
+
     while (*p && *p != ' ')
         p++;
-    
+
     *p++ = '\0';
-    
-    NSString *commandString = [[NSString alloc] initWithCString:command encoding:encoding];    
+
+    NSString *commandString = [[NSString alloc] initWithCString:command encoding:encoding];
     commandKey = [AXIRCMessage commandByString:commandString];
 
     // <params>   ::= <SPACE> [ ':' <trailing> | <middle> <params> ]
-    
-    while (*p && paramNumber < kMaxParamsAllowed)
-	{
-		if ( *p == ':' )
-		{
+
+    while (*p && paramNumber < kMaxParamsAllowed) {
+        if (*p == ':') {
             paramNumber++;
             trailingParam = (const char *)p + 1;
             NSString *param = [[NSString alloc] initWithCString:trailingParam encoding:encoding];
-			[params addObject:param];
-			break;
-		}
-        
+            [params addObject:param];
+            break;
+        }
+
         middleParam = (const char *)p;
-        
-		for (; *p && *p != ' '; p++ )
-			;
-        
-		paramNumber++;
-        
-		if (*p)
+
+        for (; *p && *p != ' '; p++);
+
+        paramNumber++;
+
+        if (*p)
             *p++ = '\0';
-        
+
         NSString *param = [[NSString alloc] initWithCString:middleParam encoding:encoding];
         [params addObject:param];
-	}
-    
+    }
+
     return [[AXIRCMessage alloc] initWithPrefix:prefix command:commandKey params:params];
 }
 
 #pragma mark - Public methods
 
 - (const uint8_t *)bytesUsingEncoding:(NSStringEncoding)encoding
-{    
+{
     NSMutableString *messageString = [NSMutableString string];
-    
+
     if (self.prefix) {
         [messageString appendString:@":"];
         [messageString appendString:self.prefix.nickOrServer];
-        
+
         if (self.prefix.user) {
             [messageString appendString:@"!"];
             [messageString appendString:self.prefix.user];
         }
-        
+
         if (self.prefix.host) {
             [messageString appendString:@"@"];
             [messageString appendString:self.prefix.host];
         }
     }
-    
+
     [messageString appendString:@" "];
-    
+
     if (self.command > AXIRCCommandCount)
         [messageString appendString:[NSString stringWithFormat:@"%li", (long)self.command]];
     else
         [messageString appendString:AXIRCCommandArray[self.command]];
-    
+
     if (self.params && self.params.count > 0) {
         for (int i = 0; i < self.params.count; i++) {
             [messageString appendString:@" "];
             if (i == self.params.count - 1)
                 [messageString appendString:@":"];
-            [messageString appendString:self.params[i]];
+            [messageString appendString:self.params[(NSUInteger)i]];
         }
     }
-    
+
     [messageString appendString:@"\r\n"];
-    
+
     return (const uint8_t *)[messageString cStringUsingEncoding:encoding];
 }
 
 #pragma mark - Private methods
 
-+ (AXIRCCommand)commandByString:(NSString *)commandString
++ (NSInteger)commandByString:(NSString *)commandString
 {
-    NSInteger index = [AXIRCMessage parseEnumByArray:AXIRCCommandArray count:AXIRCCommandCount stringValue:commandString andDefaultValue:-1];
-    
+    NSInteger index = [AXIRCMessage parseEnumByArray:AXIRCCommandArray
+                                               count:AXIRCCommandCount
+                                         stringValue:commandString
+                                     andDefaultValue:-1];
+
     if (index < 0)
         return [commandString integerValue];
     else
         return index;
 }
 
-+ (NSUInteger)parseEnumByArray:(const id *)array count:(NSUInteger)count stringValue:(NSString *)value andDefaultValue:(NSUInteger)defaultValue {
++ (NSInteger)parseEnumByArray:(const id *)array
+                         count:(NSUInteger)count
+                   stringValue:(NSString *)value
+               andDefaultValue:(NSInteger)defaultValue
+{
     return [[NSArray arrayWithObjects:array count:count] axirc_enumFromString:value andDefault:defaultValue];
 }
 
